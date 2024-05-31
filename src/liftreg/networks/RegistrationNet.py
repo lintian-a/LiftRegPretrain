@@ -225,9 +225,6 @@ class RegistrationNet(NetworkBase):
             else:
                 self.lr_scheduler.step()
 
-        # for param_group in self.optimizer.param_groups:
-        #     print("the current epoch is {} with learining rate set at {}".format(self.cur_epoch, param_group['lr']))
-
     def _init_optim(self, setting, warmming_up=False):
         """
         set optimizers and scheduler
@@ -296,7 +293,6 @@ class RegistrationNet(NetworkBase):
             param_group['lr'] = lr
         self.lr_scheduler.base_lrs=[lr]
         self.lr_scheduler.last_epoch = 1
-        # print(" the learning rate now is set to {}".format(lr))
 
     def _save_fig(self, output, phase):
         """
@@ -404,7 +400,6 @@ class RegistrationNet(NetworkBase):
         
         losses["total_loss"].backward()
         self.optimizer.step()
-        # self.optimizer.zero_grad()
         
         losses["total_loss"] = losses["total_loss"].detach().item()
 
@@ -454,7 +449,7 @@ class RegistrationNet(NetworkBase):
             self.cur_epoch = epoch
 
             self.writer.add_scalar("lr", self.optimizer.param_groups[0]['lr'], epoch)
-
+ 
             # Val
             if epoch % self.val_frequency == 0:
                 self.set_val()
@@ -512,20 +507,12 @@ class RegistrationNet(NetworkBase):
 
             # Train
             self.set_train()
-            running_train_batch = 0
             for data in self.dataloaders['train']:
                 self.global_step['train'] += 1
-                
                 losses = self.step(self.set_input(data))
 
-                running_train_batch += 1
                 for k,v in losses.items():
-                    # if k in running_train_loss.keys():
-                    #     running_train_loss[k] += v
-                    # else:
-                    #     running_train_loss[k] = v
-                    
-                    self.writer.add_scalar(f"Train/{k}", v, self.global_step['train'])     
+                    self.writer.add_scalar(f"Train/{k}", v, self.global_step['train'])            
 
             # Debug
             if self.debug_on and self.save_fig and epoch % self.save_fig_frequency==0:
